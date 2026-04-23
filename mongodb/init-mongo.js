@@ -1,0 +1,11 @@
+db = db.getSiblingDB("sports_platform");
+db.createCollection("users");
+db.createCollection("games");
+db.createCollection("venues");
+db.createCollection("bookings");
+db.createCollection("tournaments");
+db.createCollection("bills");
+db.createCollection("products");
+db.createCollection("carts");
+db.createCollection("orders");
+db.createCollection("notifications");

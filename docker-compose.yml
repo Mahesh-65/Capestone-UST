@@ -1,0 +1,144 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: sports-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb/data:/data/db
+      - ./mongodb/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - sports-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: sports-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - sports-net
+
+  users-service:
+    build:
+      context: ./users-service
+    env_file:
+      - ./users-service/.env
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - "8001:8001"
+    networks:
+      - sports-net
+
+  players-games-service:
+    build:
+      context: ./players-games-service
+    env_file:
+      - ./players-games-service/.env
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - redis
+      - users-service
+      - venues-booking-service
+    ports:
+      - "8002:8002"
+    networks:
+      - sports-net
+
+  venues-booking-service:
+    build:
+      context: ./venues-booking-service
+    env_file:
+      - ./venues-booking-service/.env
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - "8003:8003"
+    networks:
+      - sports-net
+
+  tournaments-leaderboard-service:
+    build:
+      context: ./tournaments-leaderboard-service
+    env_file:
+      - ./tournaments-leaderboard-service/.env
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - redis
+      - users-service
+      - players-games-service
+    ports:
+      - "8004:8004"
+    networks:
+      - sports-net
+
+  billing-shop-service:
+    build:
+      context: ./billing-shop-service
+    env_file:
+      - ./billing-shop-service/.env
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - redis
+      - users-service
+    ports:
+      - "8005:8005"
+    networks:
+      - sports-net
+
+  notifications-analytics-service:
+    build:
+      context: ./notifications-analytics-service
+    env_file:
+      - ./notifications-analytics-service/.env
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - redis
+      - users-service
+      - players-games-service
+      - venues-booking-service
+      - tournaments-leaderboard-service
+      - billing-shop-service
+    ports:
+      - "8006:8006"
+    networks:
+      - sports-net
+
+  frontend-service:
+    build:
+      context: ./frontend-service
+      args:
+        NEXT_PUBLIC_USERS_API: http://${EC2_PUBLIC_IP}:8001
+        NEXT_PUBLIC_GAMES_API: http://${EC2_PUBLIC_IP}:8002
+        NEXT_PUBLIC_VENUES_API: http://${EC2_PUBLIC_IP}:8003
+        NEXT_PUBLIC_TOURNAMENTS_API: http://${EC2_PUBLIC_IP}:8004
+        NEXT_PUBLIC_BILLING_API: http://${EC2_PUBLIC_IP}:8005
+        NEXT_PUBLIC_NOTIFICATIONS_API: http://${EC2_PUBLIC_IP}:8006
+    env_file:
+      - ./frontend-service/.env
+    restart: unless-stopped
+    depends_on:
+      - users-service
+      - players-games-service
+      - venues-booking-service
+      - tournaments-leaderboard-service
+      - billing-shop-service
+      - notifications-analytics-service
+    ports:
+      - "3000:3000"
+    networks:
+      - sports-net
+
+networks:
+  sports-net:
+    driver: bridge

@@ -1,0 +1,9 @@
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
+
+mongo_client = AsyncIOMotorClient(os.getenv("MONGO_URL", "mongodb://mongodb:27017"))
+db = mongo_client["sports_platform"]
+
+
+def notifications_collection():
+    return db["notifications"]
