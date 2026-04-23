@@ -7,10 +7,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <Providers>
-          <main className="mx-auto min-h-screen max-w-6xl p-6">
-            <h1 className="text-3xl font-bold">Sports Platform</h1>
-            <p className="text-zinc-400">Games, players, turfs, tournaments, billing, and shop.</p>
-            <Nav />
+          <main className="app-shell">
+            <section className="topbar">
+              <h1 className="title">Sports Platform Control Center</h1>
+              <p className="subtitle">Host games, book turfs, run tournaments, split bills, and manage gear sales.</p>
+              <Nav />
+            </section>
             {children}
           </main>
         </Providers>

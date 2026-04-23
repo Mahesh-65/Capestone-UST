@@ -1,12 +1,20 @@
+ "use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const links = ["", "find-players", "games", "grounds", "tournaments", "billing", "shop", "profile", "admin"];
 
 export function Nav() {
+  const pathname = usePathname();
   return (
-    <nav className="flex flex-wrap gap-3 py-4">
+    <nav className="nav">
       {links.map((path) => (
-        <Link key={path || "home"} href={`/${path}`} className="rounded-md border border-zinc-700 px-3 py-1 text-sm">
+        <Link
+          key={path || "home"}
+          href={`/${path}`}
+          className={`nav-link ${pathname === `/${path}` || (path === "" && pathname === "/") ? "active" : ""}`}
+        >
           {path ? path.replace("-", " ") : "home"}
         </Link>
       ))}
